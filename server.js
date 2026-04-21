@@ -110,7 +110,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Database error during login.' });
+        res.status(500).json({ error: 'Database error during login.', details: error.message, stack: error.stack });
     }
 });
 
