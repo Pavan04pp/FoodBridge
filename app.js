@@ -5,6 +5,8 @@
 /** @typedef {'pending'|'approved'|'rejected'} RequestStatus */
 /** @typedef {'pending'|'in-transit'|'delivered'} DeliveryStep */
 
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '';
+
 // ─── Badge helper ───
 /** @param {string} status @returns {string} */
 const badge = (status) => {
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:3000/api/food/available', {
+      const res = await fetch(`${API_BASE_URL}/api/food/available`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -164,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         b.className = 'px-4 py-2.5 rounded-xl bg-gray-200 text-gray-500 text-xs font-bold cursor-not-allowed';
 
         try {
-          const r = await fetch('http://localhost:3000/api/requests', {
+          const r = await fetch(`${API_BASE_URL}/api/requests`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ food_id: foodId })
@@ -254,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:3000/api/food-listings/me', {
+      const res = await fetch(`${API_BASE_URL}/api/food-listings/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -288,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           // @ts-ignore
           b.innerHTML = '...';
-          const r = await fetch(`http://localhost:3000/api/food-listings/${id}`, {
+          const r = await fetch(`${API_BASE_URL}/api/food-listings/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ food_name: newName, quantity: newQty })
@@ -340,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
 
     try {
-      const res = await fetch('http://localhost:3000/api/food-listings', {
+      const res = await fetch(`${API_BASE_URL}/api/food-listings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -545,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
 
-      const res = await fetch(`http://localhost:3000${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -629,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:3000/api/profile', {
+      const res = await fetch(`${API_BASE_URL}/api/profile`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) return;
@@ -736,7 +738,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fetch Real Stats from Backend
         let stats = { active_listings: 0, deliveries_today: 0, meals_saved: 0, expiring_soon: 0 };
         try {
-          const res = await fetch('http://localhost:3000/api/dashboard/stats/restaurant', {
+          const res = await fetch(`${API_BASE_URL}/api/dashboard/stats/restaurant`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) stats = await res.json();
@@ -785,7 +787,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Fetch Real Stats from Backend
         let stats = { pending_requests: 0, in_transit: 0, meals_received: 0, partner_restaurants: 0 };
         try {
-          const res = await fetch('http://localhost:3000/api/dashboard/stats/ngo', {
+          const res = await fetch(`${API_BASE_URL}/api/dashboard/stats/ngo`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (res.ok) stats = await res.json();
