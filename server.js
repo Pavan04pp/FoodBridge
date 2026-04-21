@@ -72,7 +72,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Database error during registration.' });
+        res.status(500).json({ error: 'Database error during registration.', details: error.message, stack: error.stack });
     }
 });
 
