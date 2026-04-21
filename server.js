@@ -230,6 +230,28 @@ app.post('/api/food-listings', authenticateToken, async (req, res) => {
     }
 });
 
+// Edit Food Listing (Restaurant) - 5 min window
+app.put('/api/food-listings/:id', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'restaurant') return res.status(403).json({ error: 'Unauthorized' });
+    const { food_name, quantity, expiry_time } = req.body;
+    try {
+        const { rows } = await pool.query('SELECT created_at FROM Food_Listing WHERE food_id = $1 AND restaurant_id = $2', [req.params.id, req.user.id]);
+        if (rows.length === 0) return res.status(404).json({ error: 'Listing not found' });
+
+        const createdAt = new Date(rows[0].created_at);
+        const now = new Date();
+        if ((now.getTime() - createdAt.getTime()) / 1000 / 60 > 5) {
+            return res.status(400).json({ error: 'Listings can only be edited within 5 minutes of creation.' });
+        }
+
+        await pool.query('UPDATE Food_Listing SET food_name = $1, quantity = $2, expiry_time = $3 WHERE food_id = $4', [food_name, quantity, expiry_time || null, req.params.id]);
+        res.json({ message: 'Listing updated successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error editing listing' });
+    }
+});
+
 // Get My Listings (Restaurant)
 app.get('/api/food-listings/me', authenticateToken, async (req, res) => {
     if (req.user.role !== 'restaurant') return res.status(403).json({ error: 'Unauthorized' });

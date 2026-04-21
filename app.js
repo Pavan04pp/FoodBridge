@@ -274,9 +274,30 @@ document.addEventListener('DOMContentLoaded', () => {
             <td class="px-6 py-4">${badge(l.status)}</td>
             <td class="px-6 py-4 text-sm text-gray-400 font-medium">—</td>
             <td class="px-6 py-4"><div class="flex gap-2">
-              <button class="px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-[10px] uppercase tracking-wider font-extrabold hover:bg-white hover:shadow-sm transition">Edit</button>
+              <button class="edit-listing-btn px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-[10px] uppercase tracking-wider font-extrabold hover:bg-white hover:shadow-sm transition" data-id="${l.food_id}" data-name="${l.food_name}" data-qty="${l.quantity}">Edit</button>
             </div></td></tr>`;
       }).join('');
+
+      body.querySelectorAll('.edit-listing-btn').forEach(b => b.addEventListener('click', async () => {
+        const id = b.dataset.id;
+        const newName = prompt('Enter new food name (Must be within 5m of creation):', b.dataset.name);
+        if (!newName) return;
+        const newQty = prompt('Enter new quantity:', b.dataset.qty);
+        if (!newQty) return;
+
+        try {
+          // @ts-ignore
+          b.innerHTML = '...';
+          const r = await fetch(`http://localhost:3000/api/food-listings/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ food_name: newName, quantity: newQty })
+          });
+          const data = await r.json();
+          if (r.ok) { showToast('✅ ' + data.message); renderListings(); }
+          else showToast('❌ ' + data.error);
+        } catch (e) { showToast('Connection Error'); }
+      }));
 
     } catch (e) { console.error(e); }
   }
@@ -660,6 +681,29 @@ document.addEventListener('DOMContentLoaded', () => {
           }).join('');
         }
       }
+
+      const df = $('dashboardActivityFeed');
+      if (df) {
+        if (!history || history.length === 0) {
+          df.innerHTML = `<p class="text-gray-400 py-4 text-sm w-full">No recent activity detected.</p>`;
+        } else {
+          df.innerHTML = history.slice(0, 5).map((item, i) => {
+            let icon = '📌', color = 'text-gray-500';
+            if (item.action.includes('Listed')) { icon = '🍱'; color = 'text-brand-500'; }
+            if (item.action.includes('Requested')) { icon = '🤝'; color = 'text-blue-500'; }
+            return `
+                 <div class="flex items-start gap-6 animate-slide-right min-h-[60px] group" style="animation-delay:${i * 0.05}s">
+                     <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center ${color} text-xl shadow-inner border border-white group-hover:scale-110 transition-transform duration-300">
+                         ${icon}</div>
+                     <div class="flex-1 min-w-0 pt-1">
+                         <p class="text-base text-gray-800 leading-snug"><span class="font-extrabold text-gray-900">${item.action}</span></p>
+                         <p class="text-[12px] uppercase font-bold text-gray-400 mt-1">${new Date(item.time).toLocaleTimeString()}</p>
+                     </div>
+                 </div>`;
+          }).join('');
+        }
+      }
+
     } catch (err) {
       console.error(err);
     }
@@ -797,6 +841,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (localStorage.getItem('foodbridge_token')) {
+    const landing = $('landingPage');
+    const app = $('dashboardApp');
+    if (landing && app) {
+      landing.classList.add('hidden');
+      app.classList.remove('hidden');
+    }
     loadProfile();
   }
 

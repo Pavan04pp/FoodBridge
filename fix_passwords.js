@@ -1,21 +1,19 @@
 const bcrypt = require('bcryptjs');
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 async function updatePasswords() {
     try {
-        const pool = mysql.createPool({
-            host: process.env.DB_HOST || 'localhost',
-            user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD || '',
-            database: process.env.DB_NAME || 'foodbridge',
+        const pool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
         });
 
         const hashedPassword = await bcrypt.hash('pass123', 10);
 
         console.log('Updating all Restaurant and NGO sample passwords to proper bcrypt hashes...');
-        await pool.query('UPDATE Restaurant SET password = ?', [hashedPassword]);
-        await pool.query('UPDATE NGO SET password = ?', [hashedPassword]);
+        await pool.query('UPDATE Restaurant SET password = $1', [hashedPassword]);
+        await pool.query('UPDATE NGO SET password = $1', [hashedPassword]);
 
         console.log('✅ Success! Sample users can now log in securely with password: pass123');
         process.exit(0);
