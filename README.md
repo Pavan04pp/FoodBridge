@@ -19,7 +19,7 @@ git clone https://github.com/Pavan04pp/FoodBridge.git
 cd FoodBridge
 
 # 2. Install dependencies
-npm install
+npm install 
 
 # 3. Configure environment (copy and edit if needed)
 copy .env.example .env
@@ -31,7 +31,7 @@ npm run setup
 npm start
 ```
 
-Then open **http://localhost:3000** in your browser. ✅
+Then open **http://localhost:3000** in your browser. 
 
 ---
 
